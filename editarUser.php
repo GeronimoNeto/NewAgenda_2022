@@ -11,7 +11,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Agenda JMF | Perfil</title>
+  <title>Agenda JMF | Home</title>
 
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
@@ -96,10 +96,10 @@
       <!-- Sidebar user panel (optional) -->
       <div class="user-panel mt-3 pb-3 mb-3 d-flex">
         <div class="image">
-          <img src="dist/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
+          <img src="dist/img/photo1.png" class="img-circle elevation-2" alt="User Image">
         </div>
         <div class="info">
-          <a href="#" class="d-block">Leandro Costa</a>
+          <a href="#" class="d-block">Laisa Larissa</a>
         </div>
       </div>
 
@@ -160,36 +160,42 @@
         
       </div><!-- /.container-fluid -->
     </div>
-    <!-- /.content-header -->
-
-    <!-- Main content -->
     <section class="content">
       <div class="container-fluid">
-        <!-- Small boxes (Stat box) -->
-        
-        <!-- /.row -->
-        <!-- Main row -->
         <div class="row">
           <div class="col-md-5">
             <div class="card card-primary">
               <div class="card-header">
-                <h3 class="card-title">Cadastrar contato</h3>
+                <h3 class="card-title">Editar contato</h3>
               </div>
-              <!-- /.card-header -->
-              <!-- form start -->
-              <form action="" method="post">
+              <?php
+                include_once('config/conexao.php');
+                $id=$_GET['idUp'];
+                $select = "SELECT * FROM Usuarios WHERE id_usuario=:id";
+                try{
+                  $resultSel = $conect->prepare($select);
+                  $resultSel ->bindParam(':id',$id, PDO::PARAM_INT);
+                  $resultSel -> execute();
+                  $contar=$resultSel->rowCount();
+                  if($contar>0){
+                    while($show=$resultSel->FETCH(PDO::FETCH_OBJ)){
+                      $idCont = $show->id_usuario; 
+                      $nomeCont = $show->nome_usuario;
+                      $emailCont = $show->email_usuario;
+                      $fotoCont = $show->foto_usuario;
+                    }
+                  }
+                }catch(PDOException $id){}
+              ?>
+              <form action="" method="post" enctype="multipart/form-data"> <!-- serve para enviar um arquivo multimidia-->
                 <div class="card-body">
                   <div class="form-group">
                     <label for="exampleInputPassword1">Nome</label>
-                    <input name="nome" type="text" class="form-control" id="exampleInputPassword1" placeholder="Digite o nome de contato...">
-                  </div>
-                  <div class="form-group">
-                    <label for="exampleInputPassword1">Telefone</label>
-                    <input name="telefone" type="text" class="form-control" id="exampleInputPassword1" placeholder="Digite seu telefone...">
+                    <input name="nome" type="text" class="form-control" id="exampleInputPassword1" value="<?php echo $nomeCont ?>">
                   </div>
                   <div class="form-group">
                     <label for="exampleInputEmail1">Endereço de E-mail</label>
-                    <input name="email" type="email" class="form-control" id="exampleInputEmail1" placeholder="Digite o endereço de e-mail...">
+                    <input name="email" type="email" class="form-control" id="exampleInputEmail1" value="<?php echo $emailCont ?>">
                   </div>
                   
                   <div class="form-group">
@@ -204,29 +210,43 @@
                   </div>
                   
                 </div>
-                <!-- /.card-body -->
-
                 <div class="card-footer">
-                  <button name="btnCContato" type="submit" class="btn btn-primary">Cadastrar Contato</button>
+                  <button name="btnCContato" type="submit" class="btn btn-primary">Editar Contato</button>
                 </div>
               </form>
               <?php
-                  include_once('config/conexao.php');
                   if(isset($_POST['btnCContato'])){
                       $nome = $_POST['nome'];
-                      $telefone = $_POST['telefone'];
                       $email = $_POST['email'];
-                      $foto = $_POST['foto'];
+                      
+                      if(!empty($_FILES['foto']['name'])){
+                        $formatP = array("png","jpg","jpeg","JPG","gif");
+                        $extensao = pathinfo($_FILES['foto']['name'],PATHINFO_EXTENSION);
+                        if(in_array($extensao, $formatP)){
+                          $pasta = "img/user/";
+                          $temporario = $_FILES['foto']['tmp_name'];
+                          $novoNome = uniqid().".$extensao";
+                          if(move_uploaded_file($temporario, $pasta.$novoNome)){
 
-                      $cadastro = "INSERT INTO tbContato (nomeContato, telefoneContato, emailContato, fotoContato) VALUES (:nome, :telefone, :email, :foto)";
+                            
+                          }else{
+                            echo "Erro não foi possível fazer o upload do arquivo!";
+                          }
+                        }else{
+                          echo "Formato Inválido";
+                        }
+                      }else{
+                        $novoNome = $fotoCont;
+                      }
+                      $editar = "UPDATE Usuarios SET nome_usuario=:nome,email_usuario=:email,foto_usuario=:foto WHERE id_usuario=:id";
+                      $cadastro = "INSERT INTO Usuarios (nome_usuario, email_usuario, foto_usuario) VALUES (:nome, :email, :foto)";
                       try{
-                        $result = $conect->prepare($cadastro);
+                        $result = $conect->prepare($editar);
+                        $result->bindParam(':id',$id,PDO::PARAM_STR);
                         $result->bindParam(':nome',$nome,PDO::PARAM_STR);
-                        $result->bindParam(':telefone',$telefone,PDO::PARAM_STR);
                         $result->bindParam(':email',$email,PDO::PARAM_STR);
-                        $result->bindParam(':foto',$foto,PDO::PARAM_STR);
+                        $result->bindParam(':foto',$novoNome,PDO::PARAM_STR);
                         $result->execute();
-
                         $contar = $result->rowCount();
                         if($contar > 0){
                           echo '<div class="container">
@@ -246,67 +266,25 @@
                                 </div>';
                         }
                       }catch(PDOException $e){
-                        echo "<strong>ERRO DE CADASTRO PDO = </strong>".$e->getMessage();
+                        echo "<strong>ERRO DE CADASTRO PDO </strong>".$e->getMessage();
                       }
                   }
-              ?>
+              ?> 
             </div>
           </div>
           <div class="col-md-7">
             <div class="card card-primary">
-              <div class="card-header">
-                <h3 class="card-title">Ultimos contatos</h3>
+              <div class="card-body p-0" style="text-align:center;">
+             <img style="margin-top:100px;width:150px;border-radius:100%" src="img/user/<?php echo $fotoCont ?>"> 
+             <h1><?php echo $nomeCont ?></h1>
+             <h3 style="margin-bottom:100px;"><?php echo $emailCont ?></h3>
               </div>
-              <!-- /.card-header -->
-              <div class="card-body p-0">
-                <table class="table table-sm">
-                  <thead>
-                    <tr>
-                      <th>Perfil</th>
-                      <th>Nome</th>
-                      <th>Telefone</th>
-                      <th>E-mail</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <?php
-                      $select = "SELECT * FROM tbContato ORDER BY idContato DESC LIMIT 8";
-                      try{
-                        $resultado = $conect->prepare($select);
-                        $resultado->execute();
-                        $contar = $resultado->rowCount();
-                        if($contar > 0){
-                          while($show = $resultado->FETCH(PDO::FETCH_OBJ)){   
-                    ?>
-                    <tr>
-                      <td><img style="width: 41px; border-radius: 100%;" src="img/foto1.jpg"></td>
-                      <td><?php echo $show->nomeContato;?></td>
-                      <td><?php echo $show->telefoneContato;?></td>
-                      <td><?php echo $show->emailContato;?></td>
-                    </tr>
-                    <?php
-                      }
-                    }else{
-                      echo "Contatos não existentes!!!";
-                    }
-                  }catch(PDOException $e){
-                    echo '<strong>ERRO DE PDO= </strong>'.$e->getMessage();
-                  }
-                    ?>
-                    
-                  </tbody>
-                </table>
-              </div>
-              <!-- /.card-body -->
             </div>
           </div>
         </div>
-        <!-- /.row (main row) -->
-      </div><!-- /.container-fluid -->
+      </div>
     </section>
-    <!-- /.content -->
   </div>
-  <!-- /.content-wrapper -->
   <footer class="main-footer">
     <strong>Copyright &copy; 2021 - Todos os direitos reservados a</strong>
     Agenda JMF.
@@ -314,10 +292,7 @@
       <b>Version</b> 1.0
     </div>
   </footer>
-
-  <!-- Control Sidebar -->
   <aside class="control-sidebar control-sidebar-dark">
-    <!-- Control sidebar content goes here -->
   </aside>
   <!-- /.control-sidebar -->
 </div>
@@ -358,4 +333,4 @@
 <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
 <script src="dist/js/pages/dashboard.js"></script>
 </body>
-</html>
+</html> 

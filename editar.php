@@ -1,3 +1,11 @@
+<?php
+  ob_start();
+  session_start();
+  if(!isset($_SESSION['loginEmail'])&&(!isset($_SESSION['loginSenha']))){
+    header("Location: index.php?acao=negado");
+  }
+  include_once("sair.php");
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -65,7 +73,7 @@
             
           </a>
           <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
+          <a href="?sair" class="dropdown-item">
             <i class="fas fa-sign-out-alt"></i> Sair do sistema
           </a>
           
