@@ -144,7 +144,15 @@
                     Perfl
                   </p>
                 </a>
-              </li>       
+              </li>
+              <li class="nav-item">
+                <a href="usuarios.php" class="nav-link">
+                  <i class="nav-icon fas fa-user"></i>
+                  <p>
+                    Usuários
+                  </p>
+                </a>
+              </li>   
         </ul>
       </nav>
       <!-- /.sidebar-menu -->
@@ -260,7 +268,7 @@
                           while($show = $resultado->FETCH(PDO::FETCH_OBJ)){   
                     ?>
                   <tr>
-                    <td style="text-align:center;"><img style="width: 55px; border-radius:100%" src="img/contato/<?php echo $show->foto_contato;?>"></td>
+                    <td style="text-align:center;"><img style="width: 55px; height:55px; border-radius:100%" src="img/contato/<?php echo $show->foto_contato;?>"></td>
                     <td style="vertical-align:middle;"><?php echo $show->nome_contato;?></td>
                     <td style="vertical-align:middle;"><?php echo $show->telefone_contato;?></td>
                     <td style="vertical-align:middle;"><?php echo $show->email_contato;?></td>

@@ -145,6 +145,14 @@
                   </p>
                 </a>
               </li>       
+              <li class="nav-item">
+                <a href="usuarios.php" class="nav-link">
+                  <i class="nav-icon fas fa-user"></i>
+                  <p>
+                    Usuários
+                  </p>
+                </a>
+              </li>   
         </ul>
       </nav>
       <!-- /.sidebar-menu -->
@@ -259,7 +267,7 @@
                           while($show = $resultado->FETCH(PDO::FETCH_OBJ)){   
                     ?>
                   <tr>
-                    <td style="text-align:center;"><img style="width: 55px; border-radius:100%" src="img/user/<?php echo $show->foto_usuario;?>"></td>
+                    <td style="text-align:center;"><img style="width: 55px; height:55px; border-radius:100%" src="img/user/<?php echo $show->foto_usuario;?>"></td>
                     <td style="vertical-align:middle;"><?php echo $show->nome_usuario;?></td>
                     <td style="vertical-align:middle;"><?php echo $show->email_usuario;?></td>
                     <td style="text-align: center; vertical-align:middle;">
